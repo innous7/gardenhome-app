@@ -1,0 +1,312 @@
+"use client";
+
+import { useState, useEffect, use } from "react";
+import Link from "next/link";
+import { ArrowLeft, Plus, X, Loader2, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { MultiImageUpload } from "@/components/ui/multi-image-upload";
+import { PROJECT_TYPES, GARDEN_STYLES } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
+import { updatePortfolio } from "../../actions";
+
+export default function EditPortfolioPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
+  const [loading, setLoading] = useState(true);
+  const [plants, setPlants] = useState<string[]>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [plantInput, setPlantInput] = useState("");
+  const [materialInput, setMaterialInput] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [beforeImages, setBeforeImages] = useState<string[]>([]);
+  const [afterImages, setAfterImages] = useState<string[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  // Pre-fill form fields
+  const [defaults, setDefaults] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function fetchPortfolio() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("portfolios")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (data) {
+        setDefaults({
+          title: data.title || "",
+          excerpt: data.excerpt || "",
+          content: data.content || "",
+          projectType: data.project_type || "",
+          style: data.style || "",
+          location: data.location || "",
+          area: data.area ? String(data.area) : "",
+          duration: data.duration || "",
+          budget: data.budget || "",
+        });
+        setCoverImageUrl(data.cover_image_url || "");
+        setPlants((data.plants as string[]) || []);
+        setMaterials((data.materials as string[]) || []);
+        setBeforeImages((data.before_images as string[]) || []);
+        setAfterImages((data.after_images as string[]) || []);
+      }
+      setLoading(false);
+    }
+    fetchPortfolio();
+  }, [id]);
+
+  const addTag = (list: string[], setList: (v: string[]) => void, input: string, setInput: (v: string) => void) => {
+    if (input.trim() && !list.includes(input.trim())) {
+      setList([...list, input.trim()]);
+      setInput("");
+    }
+  };
+
+  const removeTag = (list: string[], setList: (v: string[]) => void, tag: string) => {
+    setList(list.filter(t => t !== tag));
+  };
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>, isDraft = false) {
+    e.preventDefault();
+    setSubmitting(true);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    formData.set("coverImageUrl", coverImageUrl);
+    formData.set("plants", JSON.stringify(plants));
+    formData.set("materials", JSON.stringify(materials));
+    formData.set("beforeImages", JSON.stringify(beforeImages));
+    formData.set("afterImages", JSON.stringify(afterImages));
+    formData.set("isPublished", isDraft ? "false" : "true");
+
+    const result = await updatePortfolio(id, formData);
+    if (result?.error) {
+      setError(result.error);
+      setSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <div className="flex items-center gap-4">
+        <Link href="/partner/portfolio">
+          <Button variant="ghost" size="icon" className="rounded-xl">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">포트폴리오 수정</h1>
+          <p className="text-gray-500 mt-0.5">기존 시공 사례를 수정합니다</p>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-3">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-6">
+        <Card className="p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">기본 정보</h2>
+          <div>
+            <Label>제목 *</Label>
+            <Input name="title" defaultValue={defaults.title} className="mt-1.5 h-12 rounded-xl" required />
+          </div>
+          <div>
+            <Label>요약</Label>
+            <Textarea name="excerpt" defaultValue={defaults.excerpt} className="mt-1.5 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>조경 유형 *</Label>
+              <select name="projectType" defaultValue={defaults.projectType} className="mt-1.5 w-full h-12 rounded-xl border border-gray-200 px-3 text-sm" required>
+                <option value="">선택하세요</option>
+                {Object.entries(PROJECT_TYPES).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label>스타일 *</Label>
+              <select name="style" defaultValue={defaults.style} className="mt-1.5 w-full h-12 rounded-xl border border-gray-200 px-3 text-sm" required>
+                <option value="">선택하세요</option>
+                {Object.entries(GARDEN_STYLES).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>위치</Label>
+              <Input name="location" defaultValue={defaults.location} className="mt-1.5 h-12 rounded-xl" />
+            </div>
+            <div>
+              <Label>면적 (㎡)</Label>
+              <Input name="area" type="number" defaultValue={defaults.area} className="mt-1.5 h-12 rounded-xl" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>시공 기간</Label>
+              <Input name="duration" defaultValue={defaults.duration} className="mt-1.5 h-12 rounded-xl" />
+            </div>
+            <div>
+              <Label>예산 범위</Label>
+              <Input name="budget" defaultValue={defaults.budget} className="mt-1.5 h-12 rounded-xl" />
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">이미지</h2>
+          <div>
+            <Label>대표 이미지 *</Label>
+            <div className="mt-1.5">
+              <ImageUpload
+                bucket="portfolios"
+                folder="covers"
+                value={coverImageUrl}
+                onChange={setCoverImageUrl}
+                onRemove={() => setCoverImageUrl("")}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Before 이미지</Label>
+              <div className="mt-1.5">
+                <MultiImageUpload
+                  bucket="portfolios"
+                  folder="before"
+                  value={beforeImages}
+                  onChange={setBeforeImages}
+                  maxImages={5}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>After 이미지</Label>
+              <div className="mt-1.5">
+                <MultiImageUpload
+                  bucket="portfolios"
+                  folder="after"
+                  value={afterImages}
+                  onChange={setAfterImages}
+                  maxImages={5}
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">상세 설명</h2>
+          <Textarea
+            name="content"
+            defaultValue={defaults.content}
+            className="rounded-xl min-h-[200px]"
+          />
+        </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">식물 & 자재</h2>
+          <div>
+            <Label>사용 식물</Label>
+            <div className="mt-1.5 flex gap-2">
+              <Input
+                placeholder="식물명 입력 후 추가"
+                value={plantInput}
+                onChange={(e) => setPlantInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(plants, setPlants, plantInput, setPlantInput); } }}
+                className="h-10 rounded-xl"
+              />
+              <Button type="button" variant="outline" className="rounded-xl shrink-0" onClick={() => addTag(plants, setPlants, plantInput, setPlantInput)}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {plants.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {plants.map((p) => (
+                  <span key={p} className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 text-sm rounded-full">
+                    {p}
+                    <button type="button" onClick={() => removeTag(plants, setPlants, p)}><X className="w-3 h-3" /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <Label>사용 자재</Label>
+            <div className="mt-1.5 flex gap-2">
+              <Input
+                placeholder="자재명 입력 후 추가"
+                value={materialInput}
+                onChange={(e) => setMaterialInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(materials, setMaterials, materialInput, setMaterialInput); } }}
+                className="h-10 rounded-xl"
+              />
+              <Button type="button" variant="outline" className="rounded-xl shrink-0" onClick={() => addTag(materials, setMaterials, materialInput, setMaterialInput)}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            {materials.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {materials.map((m) => (
+                  <span key={m} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full">
+                    {m}
+                    <button type="button" onClick={() => removeTag(materials, setMaterials, m)}><X className="w-3 h-3" /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+
+        <div className="flex gap-3 justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-xl px-6"
+            disabled={submitting}
+            onClick={(e) => {
+              const form = (e.target as HTMLElement).closest("form");
+              if (form) {
+                const event = new Event("submit", { bubbles: true, cancelable: true });
+                Object.defineProperty(event, "currentTarget", { value: form });
+                handleSubmit(event as unknown as React.FormEvent<HTMLFormElement>, true);
+              }
+            }}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            비공개 저장
+          </Button>
+          <Button type="submit" disabled={submitting} className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-6">
+            {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            수정 완료
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
