@@ -7,7 +7,7 @@ import { ArrowRight, FileText, Leaf } from "lucide-react";
 
 export default function HeroSection() {
   return (
-    <section className="bg-white py-6">
+    <section className="bg-white pt-20 pb-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Main Banner */}
