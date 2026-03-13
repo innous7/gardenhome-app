@@ -20,6 +20,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrapButton } from "@/components/ui/scrap-button";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
+import { ImageGallery } from "@/components/ui/image-gallery";
+import type { GalleryImage } from "@/components/ui/image-gallery";
 import { AuthLink } from "@/components/auth/AuthLink";
 import { getPortfolioById, getPortfolios } from "@/lib/supabase/queries";
 import { getUserScraps } from "@/app/(main)/explore/actions";
@@ -73,8 +75,20 @@ export default async function PortfolioDetailPage({
 
   const beforeImages = (portfolio.before_images as string[] | null) ?? [];
   const afterImages = (portfolio.after_images as string[] | null) ?? [];
+  const processImages = (portfolio.process_images as string[] | null) ?? [];
   const plants = (portfolio.plants as string[] | null) ?? [];
   const materials = (portfolio.materials as string[] | null) ?? [];
+
+  // Collect all construction photos: cover + process images
+  const constructionPhotos: GalleryImage[] = [
+    ...(portfolio.cover_image_url
+      ? [{ url: portfolio.cover_image_url, label: "대표 사진" }]
+      : []),
+    ...processImages.map((url, i) => ({
+      url,
+      label: `시공 과정 ${i + 1}`,
+    })),
+  ];
 
   const infoItems = [
     { icon: Ruler, label: "면적", value: portfolio.area ? `${portfolio.area}㎡` : null },
@@ -169,6 +183,14 @@ export default async function PortfolioDetailPage({
             </div>
           )}
         </div>
+
+        {/* 시공 사진 Gallery */}
+        {constructionPhotos.length > 0 && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">시공 사진</h2>
+            <ImageGallery images={constructionPhotos} />
+          </div>
+        )}
 
         {/* Before / After images */}
         {beforeImages.length > 0 && afterImages.length > 0 ? (

@@ -30,15 +30,22 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
     <div className="pt-16 min-h-screen bg-gray-50">
       {/* Cover */}
       <div className={`h-48 sm:h-64 bg-gradient-to-br from-green-500 to-emerald-700 relative`}>
-        <div className="absolute inset-0 bg-black/10" />
+        {portfolios.length > 0 && portfolios[0].cover_image_url && (
+          <img src={portfolios[0].cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        )}
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
       {/* Company Info */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-10">
         <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row gap-6">
-            <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center text-3xl font-bold text-green-600 shrink-0 border-4 border-white shadow-md -mt-16 sm:-mt-12">
-              {company.company_name.charAt(0)}
+            <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center text-3xl font-bold text-green-600 shrink-0 border-4 border-white shadow-md -mt-16 sm:-mt-12 overflow-hidden">
+              {company.logo_url ? (
+                <img src={company.logo_url} alt={company.company_name} className="w-full h-full object-cover" />
+              ) : (
+                company.company_name.charAt(0)
+              )}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">

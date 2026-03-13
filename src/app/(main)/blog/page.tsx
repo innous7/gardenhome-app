@@ -106,7 +106,7 @@ export default function BlogPage() {
                 <p className="text-gray-500 mt-3 leading-relaxed">{filtered[0].excerpt}</p>
                 <div className="flex items-center gap-4 mt-4 text-sm text-gray-400">
                   <span className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" /> {filtered[0].published_at}
+                    <Clock className="w-4 h-4" /> {filtered[0].published_at ? new Date(filtered[0].published_at).toLocaleDateString("ko-KR") : ""}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye className="w-4 h-4" /> {filtered[0].views.toLocaleString()}
@@ -137,7 +137,7 @@ export default function BlogPage() {
                   <p className="text-sm text-gray-500 mt-2 line-clamp-2">{post.excerpt}</p>
                   <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-50 text-xs text-gray-400">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {post.published_at}
+                      <Clock className="w-3 h-3" /> {post.published_at ? new Date(post.published_at).toLocaleDateString("ko-KR") : ""}
                     </span>
                     <span className="flex items-center gap-1">
                       <Eye className="w-3 h-3" /> {post.views.toLocaleString()}

@@ -50,7 +50,7 @@ export default async function BlogPreview() {
                     {post.title}
                   </h3>
                   <p className="text-xs text-gray-400 mt-2">
-                    {post.published_at} · 조회 {post.views.toLocaleString()}
+                    {post.published_at ? new Date(post.published_at).toLocaleDateString("ko-KR") : ""} · 조회 {post.views.toLocaleString()}
                   </p>
                 </div>
               </article>
