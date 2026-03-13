@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const protectedPrefixes = ["/mypage", "/partner", "/admin"];
+const protectedExactPaths = ["/community/write", "/reviews/write"];
 const authRoutes = ["/login", "/register"];
 
 export async function updateSession(request: NextRequest) {
@@ -42,7 +43,8 @@ export async function updateSession(request: NextRequest) {
   // Redirect unauthenticated users away from protected routes
   if (
     !user &&
-    protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
+    (protectedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
+     protectedExactPaths.some((path) => pathname.startsWith(path)))
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

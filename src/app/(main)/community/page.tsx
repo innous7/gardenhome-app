@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, MessageCircle, Eye, PenSquare, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 type Post = {
   id: string;
@@ -24,6 +26,8 @@ type Post = {
 };
 
 export default function CommunityPage() {
+  const router = useRouter();
+  const { requireAuth } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("SHOW");
@@ -55,11 +59,12 @@ export default function CommunityPage() {
             <h1 className="text-2xl font-bold text-gray-900">커뮤니티</h1>
             <p className="text-gray-500 mt-1">정원 이야기를 나눠보세요</p>
           </div>
-          <Link href="/community/write">
-            <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full px-5">
-              <PenSquare className="w-4 h-4 mr-2" /> 글쓰기
-            </Button>
-          </Link>
+          <Button
+            onClick={() => { if (requireAuth("글을 작성하려면 로그인이 필요합니다.")) router.push("/community/write"); }}
+            className="bg-green-600 hover:bg-green-700 text-white rounded-full px-5"
+          >
+            <PenSquare className="w-4 h-4 mr-2" /> 글쓰기
+          </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

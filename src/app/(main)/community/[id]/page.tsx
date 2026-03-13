@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { toggleLike, addComment, deleteComment } from "../actions";
 
 type PostDetail = {
@@ -34,6 +35,7 @@ type Comment = {
 
 export default function CommunityPostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { requireAuth } = useAuth();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [liked, setLiked] = useState(false);
@@ -81,6 +83,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
   useEffect(() => { fetchData(); }, [id]);
 
   const handleLike = async () => {
+    if (!requireAuth("좋아요를 누르려면 로그인이 필요합니다.")) return;
     const result = await toggleLike(id);
     if ("liked" in result && result.liked !== undefined) {
       setLiked(result.liked);
@@ -90,6 +93,7 @@ export default function CommunityPostPage({ params }: { params: Promise<{ id: st
 
   const handleComment = async () => {
     if (!newComment.trim()) return;
+    if (!requireAuth("댓글을 작성하려면 로그인이 필요합니다.")) return;
     await addComment(id, newComment.trim());
     setNewComment("");
     fetchData();

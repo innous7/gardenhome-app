@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import HeroSection from "@/components/home/HeroSection";
 import PortfolioGrid from "@/components/home/PortfolioGrid";
 import CompanyShowcase from "@/components/home/CompanyShowcase";

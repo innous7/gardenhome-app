@@ -1,9 +1,12 @@
+export const dynamic = 'force-dynamic';
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Star, MapPin, CheckCircle, MessageCircle, PenSquare, Clock, Award, ArrowRight, Heart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AuthLink } from "@/components/auth/AuthLink";
 import { getCompanyById, getPortfoliosByCompany, getReviewsByCompany } from "@/lib/supabase/queries";
 import { PROJECT_TYPES, GARDEN_STYLES } from "@/lib/constants";
 
@@ -73,23 +76,23 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
             <div className="flex flex-col gap-3 sm:items-end shrink-0">
-              <Link href="/quote">
+              <AuthLink href="/quote" message="견적을 요청하려면 로그인이 필요합니다.">
                 <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full px-6 w-full sm:w-auto">
                   견적 요청하기
                 </Button>
-              </Link>
-              <Link href={`/chat?company=${id}`}>
+              </AuthLink>
+              <AuthLink href={`/chat?company=${id}`} message="채팅하려면 로그인이 필요합니다.">
                 <Button variant="outline" className="rounded-full px-6 w-full sm:w-auto">
                   <MessageCircle className="w-4 h-4 mr-2" />
                   채팅하기
                 </Button>
-              </Link>
-              <Link href={`/reviews/write?company=${id}`}>
+              </AuthLink>
+              <AuthLink href={`/reviews/write?company=${id}`} message="리뷰를 작성하려면 로그인이 필요합니다.">
                 <Button variant="outline" className="rounded-full px-6 w-full sm:w-auto">
                   <PenSquare className="w-4 h-4 mr-2" />
                   리뷰 작성
                 </Button>
-              </Link>
+              </AuthLink>
             </div>
           </div>
         </div>

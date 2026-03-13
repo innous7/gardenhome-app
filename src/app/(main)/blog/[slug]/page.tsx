@@ -1,8 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Clock, Eye, Tag, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AuthLink } from "@/components/auth/AuthLink";
 import { getBlogPostBySlug, getBlogPosts, incrementBlogViews } from "@/lib/supabase/queries";
 import { BLOG_CATEGORIES } from "@/lib/constants";
 import type { Metadata } from "next";
@@ -124,11 +127,11 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         <div className="mt-12 bg-green-50 rounded-2xl p-8 text-center">
           <h3 className="text-xl font-bold text-gray-900 mb-2">조경이 필요하신가요?</h3>
           <p className="text-gray-500 mb-4">검증된 조경 전문가에게 무료 견적을 받아보세요.</p>
-          <Link href="/quote">
+          <AuthLink href="/quote" message="견적을 요청하려면 로그인이 필요합니다.">
             <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8">
               무료 견적 받기
             </Button>
-          </Link>
+          </AuthLink>
         </div>
 
         {/* Related Posts */}

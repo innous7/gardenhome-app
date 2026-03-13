@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Bookmark } from "lucide-react";
 import { toggleScrap } from "@/app/(main)/explore/actions";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface ScrapButtonProps {
   portfolioId: string;
@@ -11,12 +12,14 @@ interface ScrapButtonProps {
 }
 
 export function ScrapButton({ portfolioId, initialScrapped = false, className = "" }: ScrapButtonProps) {
+  const { requireAuth } = useAuth();
   const [scrapped, setScrapped] = useState(initialScrapped);
   const [loading, setLoading] = useState(false);
 
   const handleToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!requireAuth("포트폴리오를 저장하려면 로그인이 필요합니다.")) return;
     setLoading(true);
     const result = await toggleScrap(portfolioId);
     if ("scrapped" in result && result.scrapped !== undefined) {

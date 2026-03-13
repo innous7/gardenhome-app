@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrapButton } from "@/components/ui/scrap-button";
 import { BeforeAfterSlider } from "@/components/ui/before-after-slider";
+import { AuthLink } from "@/components/auth/AuthLink";
 import { getPortfolioById, getPortfolios } from "@/lib/supabase/queries";
 import { getUserScraps } from "@/app/(main)/explore/actions";
 import { PROJECT_TYPES, GARDEN_STYLES } from "@/lib/constants";
@@ -317,17 +320,17 @@ export default async function PortfolioDetailPage({
               </Button>
             </Link>
             <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-              <Link href={`/chat?company=${company.id}`} className="flex-1">
+              <AuthLink href={`/chat?company=${company.id}`} message="문의하려면 로그인이 필요합니다." className="flex-1">
                 <Button variant="outline" className="w-full rounded-xl text-sm">
                   <MessageCircle className="w-4 h-4 mr-1.5" />
                   문의하기
                 </Button>
-              </Link>
-              <Link href="/quote" className="flex-1">
+              </AuthLink>
+              <AuthLink href="/quote" message="견적을 요청하려면 로그인이 필요합니다." className="flex-1">
                 <Button className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm">
                   견적 요청
                 </Button>
-              </Link>
+              </AuthLink>
             </div>
           </div>
         )}
@@ -340,11 +343,11 @@ export default async function PortfolioDetailPage({
           <p className="text-gray-500 mb-4">
             검증된 조경 전문가에게 무료 견적을 받아보세요.
           </p>
-          <Link href="/quote">
+          <AuthLink href="/quote" message="견적을 요청하려면 로그인이 필요합니다.">
             <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8">
               무료 견적 받기
             </Button>
-          </Link>
+          </AuthLink>
         </div>
 
         {/* Related Portfolios */}

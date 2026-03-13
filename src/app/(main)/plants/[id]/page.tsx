@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const CATEGORIES: Record<string, string> = { TREE: "교목", SHRUB: "관목", FLOWER: "초화류", GRASS: "잔디", GROUND_COVER: "지피식물", CLIMBING: "덩굴식물", AQUATIC: "수생식물", INDOOR: "실내식물" };
 const SUNLIGHT: Record<string, string> = { FULL_SUN: "양지 (직사광선)", PARTIAL_SUN: "반양지 (간접광)", SHADE: "음지" };
@@ -27,6 +28,7 @@ type Tip = { id: string; content: string; author_id: string; created_at: string;
 
 export default function PlantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { requireAuth } = useAuth();
   const [plant, setPlant] = useState<PlantDetail | null>(null);
   const [tips, setTips] = useState<Tip[]>([]);
   const [newTip, setNewTip] = useState("");
@@ -56,7 +58,9 @@ export default function PlantDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => { fetchData(); }, [id]);
 
   const handleAddTip = async () => {
-    if (!newTip.trim() || !userId) return;
+    if (!newTip.trim()) return;
+    if (!requireAuth("팁을 작성하려면 로그인이 필요합니다.")) return;
+    if (!userId) return;
     const supabase = createClient();
     await supabase.from("plant_tips").insert({ plant_id: id, author_id: userId, content: newTip.trim() });
     setNewTip("");
