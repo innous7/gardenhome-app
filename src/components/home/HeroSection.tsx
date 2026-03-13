@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AuthLink } from "@/components/auth/AuthLink";
 import { ArrowRight, FileText, Leaf } from "lucide-react";
 
 export default function HeroSection() {
@@ -41,8 +42,9 @@ export default function HeroSection() {
           {/* Side Banners */}
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
             {/* Top: 무료 견적 받기 */}
-            <Link
+            <AuthLink
               href="/quote"
+              message="견적을 요청하려면 로그인이 필요합니다."
               className="block rounded-2xl bg-amber-50 p-6 hover:bg-amber-100 transition-colors"
             >
               <div className="flex flex-col h-full justify-center">
@@ -56,7 +58,7 @@ export default function HeroSection() {
                   간단한 정보 입력으로 여러 전문가의 견적을 비교해보세요
                 </p>
               </div>
-            </Link>
+            </AuthLink>
 
             {/* Bottom: Flotren 조경관리 */}
             <Link

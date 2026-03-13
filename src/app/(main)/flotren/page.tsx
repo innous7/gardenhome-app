@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Check, Sprout, Calendar, FileText, Headphones, Shield, Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthLink } from "@/components/auth/AuthLink";
 import { FLOTREN_PLANS } from "@/lib/constants";
 
 const features = [
@@ -133,7 +136,7 @@ export default function FlotrenPage() {
                       </li>
                     ))}
                   </ul>
-                  <Link href={`/flotren/apply?plan=${key}`}>
+                  <AuthLink href={`/flotren/apply?plan=${key}`} message="구독을 신청하려면 로그인이 필요합니다.">
                     <Button
                       className={`w-full rounded-full ${
                         isPopular
@@ -143,7 +146,7 @@ export default function FlotrenPage() {
                     >
                       구독 신청하기
                     </Button>
-                  </Link>
+                  </AuthLink>
                 </div>
               );
             })}
@@ -161,11 +164,11 @@ export default function FlotrenPage() {
             무료 정원 상태 진단부터 시작하세요.
             전문 관리사가 방문하여 정원 상태를 점검하고 맞춤 관리 플랜을 제안합니다.
           </p>
-          <Link href="/flotren/apply">
+          <AuthLink href="/flotren/apply" message="상담을 신청하려면 로그인이 필요합니다.">
             <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white rounded-full px-8 h-14 text-lg font-semibold">
               무료 상담 신청 <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
-          </Link>
+          </AuthLink>
         </div>
       </section>
     </div>

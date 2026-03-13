@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AuthLink } from "@/components/auth/AuthLink";
 
 export default function CTASection() {
   return (
@@ -11,11 +14,11 @@ export default function CTASection() {
           받아보세요
         </p>
         <div className="flex gap-4 justify-center mt-8">
-          <Link href="/quote">
+          <AuthLink href="/quote" message="견적을 요청하려면 로그인이 필요합니다.">
             <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full h-12 px-8">
               무료 견적 받기
             </Button>
-          </Link>
+          </AuthLink>
           <Link href="/register/company">
             <Button
               variant="outline"
