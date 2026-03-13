@@ -23,15 +23,19 @@ function PortfolioCard({ portfolio }: { portfolio: PortfolioWithCompany }) {
     parseInt(portfolio.id.replace(/\D/g, "")) % gradients.length;
 
   return (
-    <Link href={`/companies/${portfolio.company_id}`} className="group">
+    <Link href={`/explore/${portfolio.id}`} className="group">
       {/* Image area */}
       <div className="aspect-[4/3] rounded-xl overflow-hidden">
         <div
-          className={`w-full h-full bg-gradient-to-br ${gradients[gradientIndex]} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}
+          className={`w-full h-full bg-gradient-to-br ${gradients[gradientIndex]} flex items-center justify-center group-hover:scale-105 transition-transform duration-300 relative`}
         >
-          <span className="text-white/30 text-6xl font-bold">
-            {GARDEN_STYLES[portfolio.style]?.charAt(0) ?? portfolio.style.charAt(0)}
-          </span>
+          {portfolio.cover_image_url ? (
+            <img src={portfolio.cover_image_url} alt={portfolio.title} className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <span className="text-white/30 text-6xl font-bold">
+              {GARDEN_STYLES[portfolio.style]?.charAt(0) ?? portfolio.style.charAt(0)}
+            </span>
+          )}
         </div>
       </div>
       {/* Info */}

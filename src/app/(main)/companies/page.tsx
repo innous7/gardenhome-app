@@ -88,8 +88,12 @@ export default function CompaniesPage() {
                 <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
                   <div className={`h-32 bg-gradient-to-br ${gradients[i % gradients.length]} relative`}>
                     <div className="absolute -bottom-8 left-6">
-                      <div className="w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center text-2xl font-bold text-green-600 border-2 border-white">
-                        {company.company_name.charAt(0)}
+                      <div className="w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center text-2xl font-bold text-green-600 border-2 border-white overflow-hidden">
+                        {company.logo_url ? (
+                          <img src={company.logo_url} alt={company.company_name} className="w-full h-full object-cover" />
+                        ) : (
+                          company.company_name.charAt(0)
+                        )}
                       </div>
                     </div>
                   </div>

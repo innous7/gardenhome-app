@@ -91,7 +91,11 @@ export default function BlogPage() {
         {filtered.length > 0 && (
           <Link href={`/blog/${filtered[0].slug}`} className="group block mb-8">
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all grid grid-cols-1 lg:grid-cols-2">
-              <div className={`aspect-[16/10] lg:aspect-auto bg-gradient-to-br ${gradients[0]}`} />
+              <div className={`aspect-[16/10] lg:aspect-auto bg-gradient-to-br ${gradients[0]} relative`}>
+                {filtered[0].cover_image_url && (
+                  <img src={filtered[0].cover_image_url} alt={filtered[0].title} className="absolute inset-0 w-full h-full object-cover" />
+                )}
+              </div>
               <div className="p-6 lg:p-10 flex flex-col justify-center">
                 <Badge className="w-fit bg-green-50 text-green-700 hover:bg-green-50 mb-4">
                   {BLOG_CATEGORIES[filtered[0].category as BlogCategory]}
@@ -118,7 +122,11 @@ export default function BlogPage() {
           {filtered.slice(1, displayCount).map((post, i) => (
             <Link key={post.id} href={`/blog/${post.slug}`} className="group">
               <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1 h-full flex flex-col">
-                <div className={`aspect-[16/10] bg-gradient-to-br ${gradients[(i + 1) % gradients.length]}`} />
+                <div className={`aspect-[16/10] bg-gradient-to-br ${gradients[(i + 1) % gradients.length]} relative`}>
+                  {post.cover_image_url && (
+                    <img src={post.cover_image_url} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+                  )}
+                </div>
                 <div className="p-5 flex flex-col flex-1">
                   <Badge className="w-fit bg-green-50 text-green-700 hover:bg-green-50 mb-2 text-xs">
                     {BLOG_CATEGORIES[post.category as BlogCategory]}

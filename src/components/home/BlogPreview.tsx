@@ -36,8 +36,12 @@ export default async function BlogPreview() {
             >
               <article>
                 <div
-                  className={`aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br ${gradients[i % gradients.length]}`}
-                />
+                  className={`aspect-[4/3] rounded-xl overflow-hidden bg-gradient-to-br ${gradients[i % gradients.length]} relative`}
+                >
+                  {post.cover_image_url && (
+                    <img src={post.cover_image_url} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+                  )}
+                </div>
                 <div className="pt-3">
                   <span className="text-xs text-green-600 font-medium">
                     {BLOG_CATEGORIES[post.category as BlogCategory]}

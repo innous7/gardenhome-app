@@ -139,9 +139,13 @@ export default function ExplorePage() {
             <Link key={p.id} href={`/explore/${p.id}`} className="group">
               <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
                 <div className={`relative aspect-[4/3] bg-gradient-to-br ${gradients[i % gradients.length]}`}>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white/20 text-7xl font-bold">{p.style.charAt(0)}</span>
-                  </div>
+                  {p.cover_image_url ? (
+                    <img src={p.cover_image_url} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-white/20 text-7xl font-bold">{p.style.charAt(0)}</span>
+                    </div>
+                  )}
                   <div className="absolute top-3 left-3 flex gap-2">
                     <Badge className="bg-white/90 text-gray-700 text-xs">{PROJECT_TYPES[p.project_type]}</Badge>
                     <Badge className="bg-green-600/90 text-white text-xs">{GARDEN_STYLES[p.style]}</Badge>

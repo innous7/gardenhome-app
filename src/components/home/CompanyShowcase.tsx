@@ -30,10 +30,14 @@ export default async function CompanyShowcase() {
               <div className="bg-white rounded-xl p-5 hover:shadow-md transition-shadow duration-300">
                 {/* Circle avatar */}
                 <div className="flex justify-center">
-                  <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-bold text-lg">
-                      {company.company_name.charAt(0)}
-                    </span>
+                  <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center overflow-hidden">
+                    {company.logo_url ? (
+                      <img src={company.logo_url} alt={company.company_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-green-600 font-bold text-lg">
+                        {company.company_name.charAt(0)}
+                      </span>
+                    )}
                   </div>
                 </div>
                 {/* Name */}

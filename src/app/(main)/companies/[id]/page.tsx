@@ -117,8 +117,11 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
           <TabsContent value="portfolio">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {portfolios.map((p, i) => (
-                <div key={p.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <Link key={p.id} href={`/explore/${p.id}`} className="block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                   <div className={`aspect-[16/10] bg-gradient-to-br ${gradients[i % gradients.length]} relative`}>
+                    {p.cover_image_url && (
+                      <img src={p.cover_image_url} alt={p.title} className="absolute inset-0 w-full h-full object-cover" />
+                    )}
                     <div className="absolute top-3 left-3 flex gap-2">
                       <Badge className="bg-white/90 text-gray-700 text-xs">{PROJECT_TYPES[p.project_type]}</Badge>
                       <Badge className="bg-green-600/90 text-white text-xs">{GARDEN_STYLES[p.style]}</Badge>
@@ -142,7 +145,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                       <span>{p.budget}</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
               {portfolios.length === 0 && (
                 <div className="col-span-2 text-center py-20 text-gray-400">

@@ -40,6 +40,9 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     <div className="pt-20 min-h-screen bg-white">
       {/* Hero */}
       <div className="bg-gradient-to-br from-green-400 to-emerald-600 h-64 sm:h-80 relative">
+        {post.cover_image_url && (
+          <img src={post.cover_image_url} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+        )}
         <div className="absolute inset-0 bg-black/20" />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 relative z-10 h-full flex flex-col justify-end pb-8">
           <Badge className="w-fit bg-white/90 text-gray-700 mb-4">
@@ -144,7 +147,11 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                 return (
                   <Link key={rp.id} href={`/blog/${rp.slug}`} className="group">
                     <div className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-all">
-                      <div className={`aspect-[16/10] bg-gradient-to-br ${gradients[i % gradients.length]}`} />
+                      <div className={`aspect-[16/10] bg-gradient-to-br ${gradients[i % gradients.length]} relative`}>
+                        {rp.cover_image_url && (
+                          <img src={rp.cover_image_url} alt={rp.title} className="absolute inset-0 w-full h-full object-cover" />
+                        )}
+                      </div>
                       <div className="p-3">
                         <h4 className="text-sm font-medium text-gray-900 group-hover:text-green-600 line-clamp-2">
                           {rp.title}
