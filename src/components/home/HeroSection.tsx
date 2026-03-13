@@ -11,8 +11,8 @@ export default function HeroSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Main Banner */}
-          <div className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 aspect-[2/1]">
-            <div className="absolute inset-0 p-8 lg:p-12 flex flex-col justify-center">
+          <div className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 lg:aspect-[2/1]">
+            <div className="p-8 lg:p-12 lg:absolute lg:inset-0 flex flex-col justify-center">
               <p className="text-white/80 text-sm font-medium mb-3">
                 조경 전문 중개 플랫폼
               </p>
