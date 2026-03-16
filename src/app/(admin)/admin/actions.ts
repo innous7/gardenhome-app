@@ -79,3 +79,144 @@ export async function updateUserRole(userId: string, role: string) {
   if (error) return { error: error.message };
   return { success: true };
 }
+
+// ── Admin helper ──
+async function verifyAdmin() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { supabase: null as never, error: "로그인이 필요합니다." };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "ADMIN")
+    return { supabase: null as never, error: "관리자 권한이 필요합니다." };
+
+  return { supabase, error: null };
+}
+
+// ── Company actions ──
+export async function updateCompany(
+  companyId: string,
+  data: {
+    company_name: string;
+    representative: string;
+    address: string;
+    phone: string;
+    business_number: string;
+    established: string | null;
+    description: string;
+  }
+) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { error } = await supabase
+    .from("companies")
+    .update(data)
+    .eq("id", companyId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function deleteCompany(companyId: string) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { error } = await supabase
+    .from("companies")
+    .delete()
+    .eq("id", companyId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+// ── User actions ──
+export async function updateUser(
+  userId: string,
+  data: { name: string; email: string; phone: string }
+) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update(data)
+    .eq("id", userId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function deleteUser(userId: string) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { error } = await supabase
+    .from("profiles")
+    .delete()
+    .eq("id", userId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+// ── Portfolio actions ──
+export async function updatePortfolio(
+  portfolioId: string,
+  data: {
+    title: string;
+    excerpt: string;
+    location: string;
+    budget: string;
+    duration: string;
+    is_published: boolean;
+  }
+) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { error } = await supabase
+    .from("portfolios")
+    .update(data)
+    .eq("id", portfolioId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function deletePortfolio(portfolioId: string) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { error } = await supabase
+    .from("portfolios")
+    .delete()
+    .eq("id", portfolioId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function togglePortfolioPublish(
+  portfolioId: string,
+  isPublished: boolean
+) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { error } = await supabase
+    .from("portfolios")
+    .update({ is_published: !isPublished })
+    .eq("id", portfolioId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}

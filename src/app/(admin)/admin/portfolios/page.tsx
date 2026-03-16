@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { Search, Eye, Heart, Pencil, Trash2, X, ExternalLink, ImageIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
 import Link from "next/link";
+import { updatePortfolio, deletePortfolio, togglePortfolioPublish } from "../actions";
 
 interface PortfolioWithCompany extends Tables<"portfolios"> {
   companies: { company_name: string } | null;
@@ -42,6 +43,7 @@ export default function AdminPortfoliosPage() {
   const [filter, setFilter] = useState<"ALL" | "published" | "draft">("ALL");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
   const [editingPortfolio, setEditingPortfolio] = useState<PortfolioWithCompany | null>(null);
   const [editForm, setEditForm] = useState({
     title: "",
@@ -81,58 +83,44 @@ export default function AdminPortfoliosPage() {
     });
   };
 
-  const handleEditSave = async () => {
+  const handleEditSave = () => {
     if (!editingPortfolio) return;
     setError("");
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("portfolios")
-      .update({
-        title: editForm.title,
-        excerpt: editForm.excerpt,
-        location: editForm.location,
-        budget: editForm.budget,
-        duration: editForm.duration,
-        is_published: editForm.is_published,
-      })
-      .eq("id", editingPortfolio.id);
-
-    if (error) {
-      setError("수정 실패: " + error.message);
-    } else {
-      setEditingPortfolio(null);
-      await fetchPortfolios();
-    }
+    startTransition(async () => {
+      const result = await updatePortfolio(editingPortfolio.id, editForm);
+      if (result?.error) {
+        setError("수정 실패: " + result.error);
+      } else {
+        setEditingPortfolio(null);
+        await fetchPortfolios();
+      }
+    });
   };
 
-  const handleDelete = async (portfolioId: string, title: string) => {
+  const handleDelete = (portfolioId: string, title: string) => {
     if (!confirm(`"${title}" 포트폴리오를 정말 삭제하시겠습니까?`)) return;
 
     setError("");
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("portfolios")
-      .delete()
-      .eq("id", portfolioId);
-
-    if (error) {
-      setError("삭제 실패: " + error.message);
-    } else {
-      await fetchPortfolios();
-    }
+    startTransition(async () => {
+      const result = await deletePortfolio(portfolioId);
+      if (result?.error) {
+        setError("삭제 실패: " + result.error);
+      } else {
+        await fetchPortfolios();
+      }
+    });
   };
 
-  const handleTogglePublish = async (portfolioId: string, currentStatus: boolean) => {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("portfolios")
-      .update({ is_published: !currentStatus })
-      .eq("id", portfolioId);
-
-    if (!error) {
-      await fetchPortfolios();
-    }
+  const handleTogglePublish = (portfolioId: string, currentStatus: boolean) => {
+    startTransition(async () => {
+      const result = await togglePortfolioPublish(portfolioId, currentStatus);
+      if (result?.error) {
+        setError("변경 실패: " + result.error);
+      } else {
+        await fetchPortfolios();
+      }
+    });
   };
 
   const filtered = portfolios.filter((p) => {
@@ -227,7 +215,9 @@ export default function AdminPortfoliosPage() {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" className="rounded-xl" onClick={() => setEditingPortfolio(null)}>취소</Button>
-              <Button className="rounded-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleEditSave}>저장</Button>
+              <Button className="rounded-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleEditSave} disabled={isPending}>
+                {isPending ? "저장 중..." : "저장"}
+              </Button>
             </div>
           </div>
         </div>
@@ -325,10 +315,11 @@ export default function AdminPortfoliosPage() {
                     size="sm"
                     className="rounded-lg text-xs"
                     onClick={() => handleTogglePublish(portfolio.id, portfolio.is_published)}
+                    disabled={isPending}
                   >
                     {portfolio.is_published ? "비공개" : "공개"}
                   </Button>
-                  <Link href={`/portfolio/${portfolio.id}`} target="_blank">
+                  <Link href={`/explore/${portfolio.id}`} target="_blank">
                     <Button variant="outline" size="sm" className="rounded-lg text-xs">
                       <ExternalLink className="w-3 h-3" />
                     </Button>
@@ -346,6 +337,7 @@ export default function AdminPortfoliosPage() {
                     size="sm"
                     className="rounded-lg text-xs text-red-600 hover:bg-red-50"
                     onClick={() => handleDelete(portfolio.id, portfolio.title)}
+                    disabled={isPending}
                   >
                     <Trash2 className="w-3 h-3" />
                   </Button>

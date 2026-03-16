@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { CheckCircle, XCircle, Clock, ExternalLink, Search, Pencil, Trash2, X } from "lucide-react";
+import { CheckCircle, Clock, Search, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
-import { approveCompany, rejectCompany } from "../actions";
+import { approveCompany, rejectCompany, updateCompany, deleteCompany } from "../actions";
 
 export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<Tables<"companies">[]>([]);
@@ -84,14 +84,12 @@ export default function AdminCompaniesPage() {
     });
   };
 
-  const handleEditSave = async () => {
+  const handleEditSave = () => {
     if (!editingCompany) return;
     setError("");
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("companies")
-      .update({
+    startTransition(async () => {
+      const result = await updateCompany(editingCompany.id, {
         company_name: editForm.company_name,
         representative: editForm.representative,
         address: editForm.address,
@@ -99,32 +97,28 @@ export default function AdminCompaniesPage() {
         business_number: editForm.business_number,
         established: editForm.established || null,
         description: editForm.description,
-      })
-      .eq("id", editingCompany.id);
-
-    if (error) {
-      setError("수정 실패: " + error.message);
-    } else {
-      setEditingCompany(null);
-      await fetchCompanies();
-    }
+      });
+      if (result?.error) {
+        setError("수정 실패: " + result.error);
+      } else {
+        setEditingCompany(null);
+        await fetchCompanies();
+      }
+    });
   };
 
-  const handleDelete = async (companyId: string, companyName: string) => {
+  const handleDelete = (companyId: string, companyName: string) => {
     if (!confirm(`"${companyName}" 회사를 정말 삭제하시겠습니까?\n\n관련된 포트폴리오, 견적 등 모든 데이터가 삭제됩니다.`)) return;
 
     setError("");
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("companies")
-      .delete()
-      .eq("id", companyId);
-
-    if (error) {
-      setError("삭제 실패: " + error.message);
-    } else {
-      await fetchCompanies();
-    }
+    startTransition(async () => {
+      const result = await deleteCompany(companyId);
+      if (result?.error) {
+        setError("삭제 실패: " + result.error);
+      } else {
+        await fetchCompanies();
+      }
+    });
   };
 
   const filtered = companies.filter(c =>
@@ -217,7 +211,9 @@ export default function AdminCompaniesPage() {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" className="rounded-xl" onClick={() => setEditingCompany(null)}>취소</Button>
-              <Button className="rounded-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleEditSave}>저장</Button>
+              <Button className="rounded-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleEditSave} disabled={isPending}>
+                {isPending ? "저장 중..." : "저장"}
+              </Button>
             </div>
           </div>
         </div>
@@ -272,6 +268,7 @@ export default function AdminCompaniesPage() {
                     size="sm"
                     className="rounded-lg text-xs text-red-600 hover:bg-red-50"
                     onClick={() => handleDelete(company.id, company.company_name)}
+                    disabled={isPending}
                   >
                     <Trash2 className="w-3 h-3 mr-1" /> 삭제
                   </Button>

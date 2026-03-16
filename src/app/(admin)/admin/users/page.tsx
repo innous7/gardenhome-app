@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useTransition } from "react";
 import { Search, MoreVertical, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { updateUserRole } from "../actions";
+import { updateUserRole, updateUser, deleteUser } from "../actions";
 import type { Tables } from "@/types/supabase";
 
 const roleColors: Record<string, string> = {
@@ -38,6 +38,7 @@ export default function AdminUsersPage() {
   const [editingUser, setEditingUser] = useState<Tables<"profiles"> | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "", phone: "" });
   const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const fetchUsers = async () => {
@@ -64,18 +65,22 @@ export default function AdminUsersPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    const result = await updateUserRole(userId, newRole);
-    if (result?.success) {
-      setUsers(
-        users.map((u) =>
-          u.id === userId
-            ? { ...u, role: newRole as Tables<"profiles">["role"] }
-            : u
-        )
-      );
-    }
-    setOpenMenuId(null);
+  const handleRoleChange = (userId: string, newRole: string) => {
+    startTransition(async () => {
+      const result = await updateUserRole(userId, newRole);
+      if (result?.success) {
+        setUsers(
+          users.map((u) =>
+            u.id === userId
+              ? { ...u, role: newRole as Tables<"profiles">["role"] }
+              : u
+          )
+        );
+      } else if (result?.error) {
+        setError("역할 변경 실패: " + result.error);
+      }
+      setOpenMenuId(null);
+    });
   };
 
   const handleEdit = (user: Tables<"profiles">) => {
@@ -87,43 +92,33 @@ export default function AdminUsersPage() {
     });
   };
 
-  const handleEditSave = async () => {
+  const handleEditSave = () => {
     if (!editingUser) return;
     setError("");
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        name: editForm.name,
-        email: editForm.email,
-        phone: editForm.phone,
-      })
-      .eq("id", editingUser.id);
-
-    if (error) {
-      setError("수정 실패: " + error.message);
-    } else {
-      setEditingUser(null);
-      await fetchUsers();
-    }
+    startTransition(async () => {
+      const result = await updateUser(editingUser.id, editForm);
+      if (result?.error) {
+        setError("수정 실패: " + result.error);
+      } else {
+        setEditingUser(null);
+        await fetchUsers();
+      }
+    });
   };
 
-  const handleDelete = async (userId: string, userName: string | null) => {
+  const handleDelete = (userId: string, userName: string | null) => {
     if (!confirm(`"${userName || "이름없음"}" 회원을 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return;
 
     setError("");
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("profiles")
-      .delete()
-      .eq("id", userId);
-
-    if (error) {
-      setError("삭제 실패: " + error.message);
-    } else {
-      await fetchUsers();
-    }
+    startTransition(async () => {
+      const result = await deleteUser(userId);
+      if (result?.error) {
+        setError("삭제 실패: " + result.error);
+      } else {
+        await fetchUsers();
+      }
+    });
   };
 
   const filtered = users.filter((u) => {
@@ -197,7 +192,9 @@ export default function AdminUsersPage() {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" className="rounded-xl" onClick={() => setEditingUser(null)}>취소</Button>
-              <Button className="rounded-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleEditSave}>저장</Button>
+              <Button className="rounded-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleEditSave} disabled={isPending}>
+                {isPending ? "저장 중..." : "저장"}
+              </Button>
             </div>
           </div>
         </div>
@@ -287,6 +284,7 @@ export default function AdminUsersPage() {
                           className="text-gray-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
                           onClick={() => handleDelete(user.id, user.name)}
                           title="삭제"
+                          disabled={isPending}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
