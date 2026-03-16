@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Leaf, LayoutDashboard, FileEdit, Users, Building2, FileText, BarChart3, Settings, LogOut, Sprout } from "lucide-react";
+import { Leaf, LayoutDashboard, FileEdit, Users, Building2, FileText, BarChart3, Settings, LogOut, Sprout, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/app/(auth)/actions";
 
@@ -11,6 +11,7 @@ const sidebarItems = [
   { label: "블로그 관리", href: "/admin/blog", icon: FileEdit },
   { label: "회원 관리", href: "/admin/users", icon: Users },
   { label: "조경회사 관리", href: "/admin/companies", icon: Building2 },
+  { label: "포트폴리오 관리", href: "/admin/portfolios", icon: Briefcase },
   { label: "거래 관리", href: "/admin/transactions", icon: FileText },
   { label: "Flotren 관리", href: "/admin/flotren", icon: Sprout },
   { label: "통계", href: "/admin/stats", icon: BarChart3 },
@@ -69,7 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span className="text-base font-bold">Admin</span>
         </Link>
         <nav className="flex gap-1">
-          {sidebarItems.slice(0, 5).map((item) => (
+          {sidebarItems.slice(0, 6).map((item) => (
             <Link
               key={item.href}
               href={item.href}

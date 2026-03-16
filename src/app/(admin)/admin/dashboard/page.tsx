@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Users, Building2, FileText, DollarSign } from "lucide-react";
+import { Users, Building2, FileText, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 
@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
     {
       label: "블로그 글",
       value: blogPostCount.toLocaleString(),
-      icon: DollarSign,
+      icon: BookOpen,
       color: "text-yellow-600 bg-yellow-50",
     },
   ];

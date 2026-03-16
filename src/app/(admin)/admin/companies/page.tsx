@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { CheckCircle, XCircle, Clock, ExternalLink, Search } from "lucide-react";
+import { CheckCircle, XCircle, Clock, ExternalLink, Search, Pencil, Trash2, X } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,16 @@ export default function AdminCompaniesPage() {
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const [editingCompany, setEditingCompany] = useState<Tables<"companies"> | null>(null);
+  const [editForm, setEditForm] = useState({
+    company_name: "",
+    representative: "",
+    address: "",
+    phone: "",
+    business_number: "",
+    established: "",
+    description: "",
+  });
 
   const fetchCompanies = async () => {
     const supabase = createClient();
@@ -48,7 +58,7 @@ export default function AdminCompaniesPage() {
 
   const handleReject = (companyId: string) => {
     const reason = prompt("거절 사유를 입력해주세요 (선택사항):");
-    if (reason === null) return; // cancelled
+    if (reason === null) return;
 
     setError("");
     startTransition(async () => {
@@ -59,6 +69,62 @@ export default function AdminCompaniesPage() {
         await fetchCompanies();
       }
     });
+  };
+
+  const handleEdit = (company: Tables<"companies">) => {
+    setEditingCompany(company);
+    setEditForm({
+      company_name: company.company_name,
+      representative: company.representative || "",
+      address: company.address || "",
+      phone: company.phone || "",
+      business_number: company.business_number || "",
+      established: company.established?.toString() || "",
+      description: company.description || "",
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!editingCompany) return;
+    setError("");
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("companies")
+      .update({
+        company_name: editForm.company_name,
+        representative: editForm.representative,
+        address: editForm.address,
+        phone: editForm.phone,
+        business_number: editForm.business_number,
+        established: editForm.established || null,
+        description: editForm.description,
+      })
+      .eq("id", editingCompany.id);
+
+    if (error) {
+      setError("수정 실패: " + error.message);
+    } else {
+      setEditingCompany(null);
+      await fetchCompanies();
+    }
+  };
+
+  const handleDelete = async (companyId: string, companyName: string) => {
+    if (!confirm(`"${companyName}" 회사를 정말 삭제하시겠습니까?\n\n관련된 포트폴리오, 견적 등 모든 데이터가 삭제됩니다.`)) return;
+
+    setError("");
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("companies")
+      .delete()
+      .eq("id", companyId);
+
+    if (error) {
+      setError("삭제 실패: " + error.message);
+    } else {
+      await fetchCompanies();
+    }
   };
 
   const filtered = companies.filter(c =>
@@ -97,6 +163,66 @@ export default function AdminCompaniesPage() {
         />
       </div>
 
+      <div className="text-sm text-gray-500">
+        총 <span className="font-semibold text-gray-900">{filtered.length}</span>개 회사
+      </div>
+
+      {/* Edit Modal */}
+      {editingCompany && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditingCompany(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">회사 정보 수정</h2>
+              <button onClick={() => setEditingCompany(null)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-gray-600 mb-1 block">회사명</label>
+                <Input value={editForm.company_name} onChange={(e) => setEditForm({ ...editForm, company_name: e.target.value })} className="rounded-xl" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">대표자</label>
+                  <Input value={editForm.representative} onChange={(e) => setEditForm({ ...editForm, representative: e.target.value })} className="rounded-xl" />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">전화번호</label>
+                  <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="rounded-xl" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600 mb-1 block">주소</label>
+                <Input value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} className="rounded-xl" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">사업자번호</label>
+                  <Input value={editForm.business_number} onChange={(e) => setEditForm({ ...editForm, business_number: e.target.value })} className="rounded-xl" />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 mb-1 block">설립연도</label>
+                  <Input type="number" value={editForm.established} onChange={(e) => setEditForm({ ...editForm, established: e.target.value })} className="rounded-xl" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600 mb-1 block">설명</label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none h-20"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" className="rounded-xl" onClick={() => setEditingCompany(null)}>취소</Button>
+              <Button className="rounded-xl bg-green-600 hover:bg-green-700 text-white" onClick={handleEditSave}>저장</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-gray-400 text-lg">등록된 조경회사가 없습니다</p>
@@ -133,8 +259,21 @@ export default function AdminCompaniesPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  <Button variant="outline" size="sm" className="rounded-lg text-xs">
-                    <ExternalLink className="w-3 h-3 mr-1" /> 보기
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg text-xs"
+                    onClick={() => handleEdit(company)}
+                  >
+                    <Pencil className="w-3 h-3 mr-1" /> 수정
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg text-xs text-red-600 hover:bg-red-50"
+                    onClick={() => handleDelete(company.id, company.company_name)}
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" /> 삭제
                   </Button>
                   {!company.is_approved && (
                     <>
