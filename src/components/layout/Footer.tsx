@@ -94,7 +94,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-gray-500">
               <li>
                 <Link
-                  href="/partner/register"
+                  href="/partner/join"
                   className="hover:text-gray-700 transition-colors"
                 >
                   업체 등록

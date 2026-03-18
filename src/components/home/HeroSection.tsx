@@ -25,7 +25,7 @@ export default function HeroSection() {
                 검증된 조경 전문가와 함께 나만의 정원을 완성하세요.
                 무료 견적부터 시공, 사후관리까지 함께합니다.
               </p>
-              <div>
+              <div className="flex flex-wrap gap-3">
                 <Link href="/explore">
                   <Button
                     size="lg"
@@ -33,6 +33,15 @@ export default function HeroSection() {
                   >
                     포트폴리오 둘러보기
                     <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/partner/join">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/60 text-white hover:bg-white/20 rounded-full px-6 h-12 text-base font-semibold"
+                  >
+                    파트너 입점 신청
                   </Button>
                 </Link>
               </div>

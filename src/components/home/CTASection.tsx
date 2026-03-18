@@ -19,7 +19,7 @@ export default function CTASection() {
               무료 견적 받기
             </Button>
           </AuthLink>
-          <Link href="/register/company">
+          <Link href="/partner/join">
             <Button
               variant="outline"
               className="border border-gray-300 text-gray-700 rounded-full h-12 px-8 hover:bg-gray-100"

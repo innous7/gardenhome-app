@@ -75,6 +75,14 @@ export default function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
+            <Link href="/partner/join">
+              <Button
+                variant="outline"
+                className="border-green-600 text-green-600 hover:bg-green-50 rounded-full px-5 h-9 text-sm font-medium"
+              >
+                파트너 모집
+              </Button>
+            </Link>
             <Link href="/quote">
               <Button className="bg-green-600 hover:bg-green-700 text-white rounded-full px-5 h-9 text-sm font-medium">
                 견적요청
@@ -199,6 +207,14 @@ export default function Header() {
                     <Link href="/quote" onClick={() => setOpen(false)}>
                       <Button className="w-full bg-green-600 hover:bg-green-700 text-white rounded-full">
                         견적요청
+                      </Button>
+                    </Link>
+                    <Link href="/partner/join" onClick={() => setOpen(false)}>
+                      <Button
+                        variant="outline"
+                        className="w-full border-green-600 text-green-600 rounded-full"
+                      >
+                        파트너 모집
                       </Button>
                     </Link>
                     {!loading && user ? (

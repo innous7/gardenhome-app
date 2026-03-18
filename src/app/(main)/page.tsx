@@ -5,6 +5,7 @@ import PortfolioGrid from "@/components/home/PortfolioGrid";
 import CompanyShowcase from "@/components/home/CompanyShowcase";
 import BlogPreview from "@/components/home/BlogPreview";
 import FlotrenBanner from "@/components/home/FlotrenBanner";
+import PartnerRecruitBanner from "@/components/home/PartnerRecruitBanner";
 import StatsSection from "@/components/home/StatsSection";
 import CTASection from "@/components/home/CTASection";
 
@@ -29,6 +30,7 @@ export default function HomePage() {
       <CompanyShowcase />
       <BlogPreview />
       <FlotrenBanner />
+      <PartnerRecruitBanner />
       <CTASection />
     </>
   );
