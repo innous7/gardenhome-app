@@ -38,8 +38,7 @@ export default function HeroSection() {
                 <Link href="/partner/join">
                   <Button
                     size="lg"
-                    variant="outline"
-                    className="border-white/60 text-white hover:bg-white/20 rounded-full px-6 h-12 text-base font-semibold"
+                    className="bg-white text-green-700 hover:bg-white/90 rounded-full px-6 h-12 text-base font-semibold shadow-lg"
                   >
                     파트너 입점 신청
                   </Button>
