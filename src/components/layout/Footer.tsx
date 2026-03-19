@@ -13,7 +13,7 @@ const SUPPORT_LINKS = [
   { label: "회사 소개", href: "/about" },
   { label: "이용약관", href: "/terms" },
   { label: "개인정보처리방침", href: "/privacy" },
-  { label: "문의하기", href: "/contact" },
+  { label: "고객센터", href: "/contact" },
 ];
 
 export default function Footer() {
@@ -82,9 +82,9 @@ export default function Footer() {
               연락처
             </h4>
             <ul className="space-y-2 text-sm text-gray-500">
-              <li>이메일: contact@gardenhome.kr</li>
-              <li>전화: 1588-0000</li>
-              <li>서울특별시 강남구</li>
+              <li>이메일: innous@kakao.com</li>
+              <li>운영시간: 09:00~18:00</li>
+              <li>경기도 성남시 수정구</li>
             </ul>
           </div>
           <div>
@@ -115,9 +115,9 @@ export default function Footer() {
         {/* Bottom: Company info */}
         <div className="pt-4 pb-2">
           <p className="text-xs text-gray-400 leading-relaxed">
-            (주)가든홈 | 대표: 홍길동 | 사업자등록번호: 000-00-00000 |
-            통신판매업신고: 2024-서울강남-00000 | 주소: 서울특별시 강남구 |
-            이메일: contact@gardenhome.kr | 전화: 1588-0000
+            주식회사 이노어스 | 대표: 김승용 |
+            주소: 경기도 성남시 수정구 금토로 52, 경기스타트업브릿지 E동 803호 |
+            이메일: innous@kakao.com
           </p>
         </div>
       </div>

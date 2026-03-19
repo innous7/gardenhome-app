@@ -95,11 +95,23 @@ const values = [
   },
 ];
 
-const team = [
-  { name: "김대표", role: "CEO / 대표이사", initial: "김" },
-  { name: "이기획", role: "기획팀 리드", initial: "이" },
-  { name: "박개발", role: "개발팀 리드", initial: "박" },
-  { name: "최디자인", role: "디자인팀 리드", initial: "최" },
+const services = [
+  {
+    title: "조경 견적 비교",
+    description: "한 번의 요청으로 다수의 검증된 조경회사로부터 견적을 받고, 가격과 서비스를 투명하게 비교할 수 있습니다.",
+  },
+  {
+    title: "포트폴리오 탐색",
+    description: "실제 시공 사례 사진과 고객 리뷰를 통해 각 조경회사의 전문 분야와 실력을 한눈에 확인할 수 있습니다.",
+  },
+  {
+    title: "프로젝트 관리",
+    description: "견적 요청부터 계약, 시공 진행, 완료까지 모든 과정을 플랫폼에서 체계적으로 관리합니다.",
+  },
+  {
+    title: "Flotren 조경관리 구독",
+    description: "전문 관리사가 정기적으로 방문하여 정원을 관리해드리는 구독 서비스로, 아름다운 정원을 유지하세요.",
+  },
 ];
 
 export default function AboutPage() {
@@ -223,29 +235,71 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Services Section */}
       <section className="py-16 sm:py-24">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              팀 소개
+              주요 서비스
             </h2>
             <p className="text-gray-600">
-              더 나은 조경 경험을 만들어가는 GardenHome 팀입니다.
+              GardenHome이 제공하는 조경 서비스를 소개합니다.
             </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {team.map((member) => (
-              <div key={member.name} className="text-center">
-                <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-green-100 to-emerald-200 rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-green-700">
-                    {member.initial}
-                  </span>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {services.map((service, i) => (
+              <div
+                key={service.title}
+                className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-green-600 text-white rounded-lg flex items-center justify-center font-bold text-sm">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {service.title}
+                  </h3>
                 </div>
-                <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">{member.role}</p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {service.description}
+                </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Company Info Section */}
+      <section className="py-16 sm:py-24 bg-white border-t border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              회사 정보
+            </h2>
+          </div>
+          <div className="max-w-2xl mx-auto bg-gray-50 rounded-2xl p-8">
+            <dl className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <dt className="text-sm font-semibold text-gray-900 sm:w-32 shrink-0">회사명</dt>
+                <dd className="text-sm text-gray-600">주식회사 이노어스</dd>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <dt className="text-sm font-semibold text-gray-900 sm:w-32 shrink-0">대표</dt>
+                <dd className="text-sm text-gray-600">김승용</dd>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <dt className="text-sm font-semibold text-gray-900 sm:w-32 shrink-0">소재지</dt>
+                <dd className="text-sm text-gray-600">경기도 성남시 수정구 금토로 52, 경기스타트업브릿지 E동 803호</dd>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <dt className="text-sm font-semibold text-gray-900 sm:w-32 shrink-0">이메일</dt>
+                <dd className="text-sm text-gray-600">innous@kakao.com</dd>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:gap-4">
+                <dt className="text-sm font-semibold text-gray-900 sm:w-32 shrink-0">서비스</dt>
+                <dd className="text-sm text-gray-600">GardenHome (조경 중개 플랫폼) / Flotren (조경관리 구독)</dd>
+              </div>
+            </dl>
           </div>
         </div>
       </section>

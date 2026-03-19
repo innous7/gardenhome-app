@@ -238,14 +238,15 @@ export default function PrivacyPage() {
             <div className="bg-gray-50 rounded-lg p-4 space-y-1">
               <p className="text-sm text-gray-700">
                 <span className="font-semibold">개인정보 보호책임자:</span>{" "}
-                GardenHome 개인정보보호팀
+                김승용
+              </p>
+              <p className="text-sm text-gray-700">
+                <span className="font-semibold">소속:</span>{" "}
+                주식회사 이노어스
               </p>
               <p className="text-sm text-gray-700">
                 <span className="font-semibold">이메일:</span>{" "}
-                privacy@gardenhome.kr
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-semibold">전화:</span> 02-0000-0000
+                innous@kakao.com
               </p>
             </div>
             <p className="text-gray-600 text-sm mt-4 leading-relaxed">
