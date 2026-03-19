@@ -226,3 +226,61 @@ export async function togglePortfolioPublish(
   if (error) return { error: error.message };
   return { success: true };
 }
+
+// ── Edit Request actions ──
+export async function approveEditRequest(requestId: string, modifiedChanges?: Record<string, unknown>) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: request } = await supabase
+    .from("company_edit_requests")
+    .select("company_id, requested_changes")
+    .eq("id", requestId)
+    .single();
+
+  if (!request) return { error: "요청을 찾을 수 없습니다." };
+
+  const changes = modifiedChanges || (request.requested_changes as Record<string, unknown>);
+
+  const { error: updateError } = await supabase
+    .from("companies")
+    .update(changes)
+    .eq("id", request.company_id);
+
+  if (updateError) return { error: updateError.message };
+
+  const { error: statusError } = await supabase
+    .from("company_edit_requests")
+    .update({
+      status: "approved",
+      reviewed_by: user!.id,
+      reviewed_at: new Date().toISOString(),
+      ...(modifiedChanges ? { requested_changes: modifiedChanges } : {}),
+    })
+    .eq("id", requestId);
+
+  if (statusError) return { error: statusError.message };
+  return { success: true };
+}
+
+export async function rejectEditRequest(requestId: string, adminNote?: string) {
+  const { supabase, error: authError } = await verifyAdmin();
+  if (authError) return { error: authError };
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { error: rejectError } = await supabase
+    .from("company_edit_requests")
+    .update({
+      status: "rejected",
+      admin_note: adminNote || null,
+      reviewed_by: user!.id,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", requestId);
+
+  if (rejectError) return { error: rejectError.message };
+  return { success: true };
+}

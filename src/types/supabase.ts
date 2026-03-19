@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      company_edit_requests: {
+        Row: {
+          id: string;
+          company_id: string;
+          user_id: string;
+          requested_changes: Record<string, unknown>;
+          status: string;
+          admin_note: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          company_id: string;
+          user_id: string;
+          requested_changes: Record<string, unknown>;
+          status?: string;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          company_id?: string;
+          user_id?: string;
+          requested_changes?: Record<string, unknown>;
+          status?: string;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          { foreignKeyName: "company_edit_requests_company_id_fkey"; columns: ["company_id"]; referencedRelation: "companies"; referencedColumns: ["id"] },
+          { foreignKeyName: "company_edit_requests_user_id_fkey"; columns: ["user_id"]; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
       profiles: {
         Row: {
           id: string;

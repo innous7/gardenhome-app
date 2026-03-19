@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Leaf, LayoutDashboard, FileEdit, Users, Building2, FileText, BarChart3, Settings, LogOut, Sprout, Briefcase } from "lucide-react";
+import { Leaf, LayoutDashboard, FileEdit, Users, Building2, FileText, BarChart3, Settings, LogOut, Sprout, Briefcase, ClipboardEdit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/app/(auth)/actions";
 
@@ -11,6 +11,7 @@ const sidebarItems = [
   { label: "블로그 관리", href: "/admin/blog", icon: FileEdit },
   { label: "회원 관리", href: "/admin/users", icon: Users },
   { label: "조경회사 관리", href: "/admin/companies", icon: Building2 },
+  { label: "정보수정 요청", href: "/admin/edit-requests", icon: ClipboardEdit },
   { label: "포트폴리오 관리", href: "/admin/portfolios", icon: Briefcase },
   { label: "거래 관리", href: "/admin/transactions", icon: FileText },
   { label: "Flotren 관리", href: "/admin/flotren", icon: Sprout },
