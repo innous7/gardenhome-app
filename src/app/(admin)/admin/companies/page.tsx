@@ -249,7 +249,19 @@ export default function AdminCompaniesPage() {
                     <p className="text-xs text-gray-400 mt-0.5">
                       사업자번호: {company.business_number} · 설립: {company.established}년
                       {company.business_license_url && (
-                        <> · <a href={company.business_license_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">사업자등록증 보기</a></>
+                        <> · <button
+                          type="button"
+                          className="text-blue-500 hover:underline"
+                          onClick={async () => {
+                            const supabase = createClient();
+                            const { data } = await supabase.storage
+                              .from("business-licenses")
+                              .createSignedUrl(company.business_license_url!, 600);
+                            if (data?.signedUrl) {
+                              window.open(data.signedUrl, "_blank");
+                            }
+                          }}
+                        >사업자등록증 보기</button></>
                       )}
                     </p>
                   </div>
