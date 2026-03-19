@@ -221,10 +221,6 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                       <dd className="text-gray-900 font-medium">{company.established}년</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt className="text-gray-500">연락처</dt>
-                      <dd className="text-gray-900 font-medium">{company.phone}</dd>
-                    </div>
-                    <div className="flex justify-between">
                       <dt className="text-gray-500">주소</dt>
                       <dd className="text-gray-900 font-medium">{company.address}</dd>
                     </div>
