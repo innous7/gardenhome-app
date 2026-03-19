@@ -87,6 +87,25 @@ export async function updateSession(request: NextRequest) {
     if (pathname.startsWith("/mypage") && role !== "CUSTOMER" && role !== "ADMIN") {
       return redirectHome();
     }
+
+    // OAuth 사용자 전화번호 미입력 시 설정 페이지로 강제 이동
+    if (role === "CUSTOMER" && !pathname.startsWith("/mypage/settings")) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("phone")
+        .eq("id", user.id)
+        .single();
+
+      // provider가 OAuth(email이 아닌)이고 전화번호 없으면 리다이렉트
+      const providers = user.app_metadata?.providers as string[] | undefined;
+      const isOAuth = providers?.some((p: string) => p !== "email");
+      if (isOAuth && !profileData?.phone) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/mypage/settings";
+        url.searchParams.set("require_phone", "true");
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return supabaseResponse;

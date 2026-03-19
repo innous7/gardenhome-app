@@ -1,15 +1,19 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { Suspense, useState, useEffect, useTransition } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Phone } from "lucide-react";
 import { updateProfile, updatePassword } from "../actions";
 import { createClient } from "@/lib/supabase/client";
 
-export default function CustomerSettingsPage() {
+function SettingsContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const requirePhone = searchParams.get("require_phone") === "true";
   const [profile, setProfile] = useState<{ name: string; email: string; phone: string | null } | null>(null);
 
   useEffect(() => {
@@ -45,6 +49,9 @@ export default function CustomerSettingsPage() {
         setProfileMsg({ type: "error", text: result.error });
       } else {
         setProfileMsg({ type: "success", text: "프로필이 저장되었습니다." });
+        if (requirePhone) {
+          router.replace("/mypage/settings");
+        }
       }
     });
   };
@@ -85,6 +92,18 @@ export default function CustomerSettingsPage() {
         <p className="text-gray-500 mt-1">내 정보를 관리하세요</p>
       </div>
 
+      {requirePhone && !profile?.phone && (
+        <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <Phone className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800">전화번호 입력이 필요합니다</p>
+            <p className="text-sm text-amber-700 mt-0.5">
+              서비스 이용을 위해 전화번호를 입력해주세요. 견적 요청, 상담 등에 사용됩니다.
+            </p>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleProfileSubmit}>
         <Card className="p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900">프로필</h2>
@@ -107,12 +126,16 @@ export default function CustomerSettingsPage() {
               />
             </div>
             <div>
-              <Label>전화번호</Label>
+              <Label>
+                전화번호 <span className="text-red-500">*</span>
+              </Label>
               <Input
                 name="phone"
                 key={profile?.phone}
                 defaultValue={profile?.phone || ""}
-                className="mt-1.5 h-11 rounded-xl"
+                placeholder="010-0000-0000"
+                required
+                className={`mt-1.5 h-11 rounded-xl ${requirePhone && !profile?.phone ? "ring-2 ring-amber-400" : ""}`}
               />
             </div>
           </div>
@@ -229,5 +252,13 @@ export default function CustomerSettingsPage() {
         </Card>
       </form>
     </div>
+  );
+}
+
+export default function CustomerSettingsPage() {
+  return (
+    <Suspense>
+      <SettingsContent />
+    </Suspense>
   );
 }
