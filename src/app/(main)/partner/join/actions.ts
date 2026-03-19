@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function applyPartner(formData: FormData) {
@@ -33,7 +32,7 @@ export async function applyPartner(formData: FormData) {
     return { error: "이미 파트너 신청이 되어 있습니다." };
   }
 
-  // 회사 레코드 생성
+  // 회사 레코드 생성 (is_approved: false → 관리자 승인 대기)
   const { error: companyError } = await supabase.from("companies").insert({
     user_id: user.id,
     company_name: companyName,
@@ -49,11 +48,6 @@ export async function applyPartner(formData: FormData) {
     return { error: companyError.message };
   }
 
-  // 프로필 역할을 COMPANY로 변경
-  await supabase
-    .from("profiles")
-    .update({ role: "COMPANY" })
-    .eq("id", user.id);
-
-  redirect("/register/pending");
+  // 역할은 변경하지 않음 - 관리자 승인 후 COMPANY로 변경
+  return { success: true };
 }

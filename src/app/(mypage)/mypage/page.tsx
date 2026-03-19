@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FileText, FolderOpen, Sprout, ArrowRight } from "lucide-react";
+import { FileText, FolderOpen, Sprout, ArrowRight, Building2, Clock, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +19,7 @@ export default function MypageDashboard() {
   const [userName, setUserName] = useState("");
   const [stats, setStats] = useState({ quotes: 0, contracts: 0, flotren: 0 });
   const [recentQuotes, setRecentQuotes] = useState<any[]>([]);
+  const [partnerApplication, setPartnerApplication] = useState<{ company_name: string; is_approved: boolean; created_at: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,6 +49,15 @@ export default function MypageDashboard() {
         .order("created_at", { ascending: false })
         .limit(3);
       setRecentQuotes(quotes || []);
+
+      // 파트너 신청 상태 확인
+      const { data: company } = await supabase
+        .from("companies")
+        .select("company_name, is_approved, created_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (company) setPartnerApplication(company);
+
       setLoading(false);
     };
     fetchData();
@@ -105,6 +115,38 @@ export default function MypageDashboard() {
           </div>
         </Card>
       </div>
+
+      {/* Partner Application Status */}
+      {partnerApplication && (
+        <Card className={`p-5 border-l-4 ${partnerApplication.is_approved ? "border-l-green-500 bg-green-50/50" : "border-l-amber-500 bg-amber-50/50"}`}>
+          <div className="flex items-start gap-4">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${partnerApplication.is_approved ? "bg-green-100" : "bg-amber-100"}`}>
+              {partnerApplication.is_approved ? (
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              ) : (
+                <Clock className="w-5 h-5 text-amber-600" />
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Building2 className="w-4 h-4 text-gray-500" />
+                <h3 className="font-semibold text-gray-900">파트너 입점 신청</h3>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${partnerApplication.is_approved ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                  {partnerApplication.is_approved ? "승인 완료" : "승인 대기"}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {partnerApplication.company_name} · 신청일 {new Date(partnerApplication.created_at).toLocaleDateString("ko-KR")}
+              </p>
+              {!partnerApplication.is_approved && (
+                <p className="text-xs text-gray-500 mt-1">
+                  관리자가 사업자등록증 확인 후 승인해드립니다. 영업일 기준 1~2일 소요됩니다.
+                </p>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Recent activity */}
       <div>

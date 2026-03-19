@@ -4,7 +4,8 @@ import { useState, useRef, useTransition, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Upload, FileCheck, X, Loader2 } from "lucide-react";
+import { Building2, Upload, FileCheck, X, Loader2, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { applyPartner } from "./actions";
 
@@ -12,17 +13,29 @@ export default function PartnerApplyForm() {
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [licenseFile, setLicenseFile] = useState<File | null>(null);
   const [licenseUrl, setLicenseUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      if (user) {
+        const { data: company } = await supabase
+          .from("companies")
+          .select("id, is_approved")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (company) {
+          setAlreadyApplied(true);
+        }
+      }
       setLoading(false);
     };
     checkUser();
@@ -80,6 +93,8 @@ export default function PartnerApplyForm() {
       const result = await applyPartner(formData);
       if (result?.error) {
         setError(result.error);
+      } else if (result?.success) {
+        setSubmitted(true);
       }
     });
   };
@@ -108,6 +123,45 @@ export default function PartnerApplyForm() {
             </Button>
           </a>
         </div>
+      </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <div className="text-center py-10 space-y-4">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <CheckCircle2 className="w-8 h-8 text-green-600" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900">입점 신청이 완료되었습니다!</h3>
+        <p className="text-gray-600 max-w-sm mx-auto">
+          관리자가 사업자등록증을 확인한 후 승인해드립니다.
+          영업일 기준 1~2일 내에 처리되며, 승인 결과는 마이페이지에서 확인하실 수 있습니다.
+        </p>
+        <Link href="/mypage">
+          <Button className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 mt-2">
+            마이페이지로 이동
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (alreadyApplied) {
+    return (
+      <div className="text-center py-10 space-y-4">
+        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+          <Building2 className="w-8 h-8 text-amber-600" />
+        </div>
+        <h3 className="text-xl font-bold text-gray-900">이미 입점 신청이 접수되었습니다</h3>
+        <p className="text-gray-600">
+          현재 관리자 승인 대기 중입니다. 마이페이지에서 진행 상태를 확인하세요.
+        </p>
+        <Link href="/mypage">
+          <Button className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 mt-2">
+            마이페이지로 이동
+          </Button>
+        </Link>
       </div>
     );
   }

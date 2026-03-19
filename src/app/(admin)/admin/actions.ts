@@ -21,6 +21,12 @@ export async function approveCompany(companyId: string) {
   if (error) return { error: error.message };
 
   if (company) {
+    // 프로필 역할을 COMPANY로 변경
+    await supabase
+      .from("profiles")
+      .update({ role: "COMPANY" })
+      .eq("id", company.user_id);
+
     await notifyCompanyApproval(company.user_id, true);
   }
 
