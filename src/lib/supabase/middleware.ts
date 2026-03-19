@@ -78,8 +78,9 @@ export async function updateSession(request: NextRequest) {
       return redirectHome();
     }
 
-    // /partner/* → COMPANY or ADMIN only
-    if (pathname.startsWith("/partner") && role !== "COMPANY" && role !== "ADMIN") {
+    // /partner/join → 모든 로그인 사용자 접근 가능 (파트너 신청)
+    // /partner/* (그 외) → COMPANY or ADMIN only
+    if (pathname.startsWith("/partner") && !pathname.startsWith("/partner/join") && role !== "COMPANY" && role !== "ADMIN") {
       return redirectHome();
     }
 
