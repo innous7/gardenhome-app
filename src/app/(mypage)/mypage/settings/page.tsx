@@ -15,6 +15,7 @@ function SettingsContent() {
   const router = useRouter();
   const requirePhone = searchParams.get("require_phone") === "true";
   const [profile, setProfile] = useState<{ name: string; email: string; phone: string | null } | null>(null);
+  const [isOAuthUser, setIsOAuthUser] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -23,6 +24,11 @@ function SettingsContent() {
       if (user) {
         const { data } = await supabase.from("profiles").select("name, email, phone").eq("id", user.id).single();
         setProfile(data);
+        // OAuth 사용자 여부 확인 (provider가 email이 아닌 경우)
+        const providers = user.app_metadata?.providers as string[] | undefined;
+        if (providers?.some((p: string) => p !== "email")) {
+          setIsOAuthUser(true);
+        }
       }
     };
     fetchProfile();
@@ -201,56 +207,66 @@ function SettingsContent() {
         </div>
       </Card>
 
-      <form onSubmit={handlePasswordSubmit}>
-        <Card className="p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">비밀번호 변경</h2>
-          <div>
-            <Label>현재 비밀번호</Label>
-            <Input
-              name="currentPassword"
-              type="password"
-              className="mt-1.5 h-11 rounded-xl"
-            />
-          </div>
-          <div>
-            <Label>새 비밀번호</Label>
-            <Input
-              name="newPassword"
-              type="password"
-              className="mt-1.5 h-11 rounded-xl"
-              required
-            />
-          </div>
-          <div>
-            <Label>비밀번호 확인</Label>
-            <Input
-              name="confirmPassword"
-              type="password"
-              className="mt-1.5 h-11 rounded-xl"
-              required
-            />
-          </div>
-          {passwordMsg && (
-            <div
-              className={`text-sm rounded-xl p-3 ${passwordMsg.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}
-            >
-              {passwordMsg.text}
-            </div>
-          )}
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={passwordPending}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8"
-            >
-              {passwordPending ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : null}
-              비밀번호 변경
-            </Button>
-          </div>
+      {isOAuthUser ? (
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">비밀번호 변경</h2>
+          <p className="text-sm text-gray-500">
+            소셜 로그인(Google/Kakao)으로 가입한 계정은 비밀번호 변경이 필요하지 않습니다.
+            로그인 시 해당 소셜 계정을 이용해주세요.
+          </p>
         </Card>
-      </form>
+      ) : (
+        <form onSubmit={handlePasswordSubmit}>
+          <Card className="p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900">비밀번호 변경</h2>
+            <div>
+              <Label>현재 비밀번호</Label>
+              <Input
+                name="currentPassword"
+                type="password"
+                className="mt-1.5 h-11 rounded-xl"
+              />
+            </div>
+            <div>
+              <Label>새 비밀번호</Label>
+              <Input
+                name="newPassword"
+                type="password"
+                className="mt-1.5 h-11 rounded-xl"
+                required
+              />
+            </div>
+            <div>
+              <Label>비밀번호 확인</Label>
+              <Input
+                name="confirmPassword"
+                type="password"
+                className="mt-1.5 h-11 rounded-xl"
+                required
+              />
+            </div>
+            {passwordMsg && (
+              <div
+                className={`text-sm rounded-xl p-3 ${passwordMsg.type === "success" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}
+              >
+                {passwordMsg.text}
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={passwordPending}
+                className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8"
+              >
+                {passwordPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                비밀번호 변경
+              </Button>
+            </div>
+          </Card>
+        </form>
+      )}
     </div>
   );
 }
