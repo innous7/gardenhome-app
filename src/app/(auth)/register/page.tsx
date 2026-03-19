@@ -75,20 +75,18 @@ export default function RegisterPage() {
 
     const { data, error: uploadError } = await supabase.storage
       .from("business-licenses")
-      .upload(fileName, file);
+      .upload(fileName, file, { upsert: true });
 
     if (uploadError) {
+      console.error("Upload error:", uploadError);
       setError("파일 업로드에 실패했습니다. 다시 시도해주세요.");
       setUploading(false);
       return;
     }
 
-    const { data: urlData } = supabase.storage
-      .from("business-licenses")
-      .getPublicUrl(data.path);
-
+    // 비공개 버킷이므로 경로만 저장 (관리자가 signed URL로 조회)
     setLicenseFile(file);
-    setLicenseUrl(urlData.publicUrl);
+    setLicenseUrl(data.path);
     setUploading(false);
   };
 
