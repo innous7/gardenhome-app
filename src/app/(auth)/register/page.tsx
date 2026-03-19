@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef, useTransition, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, User, Phone, Building2, UserPlus, Loader2, Upload, FileCheck, X } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, Phone, Building2, UserPlus, Loader2, Upload, FileCheck, X, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,39 @@ export default function RegisterPage() {
   const [licenseUrl, setLicenseUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 이메일 중복 체크
+  const [email, setEmail] = useState("");
+  const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const emailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const checkEmailDuplicate = useCallback(async (emailValue: string) => {
+    if (!emailValue || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+      setEmailStatus("idle");
+      return;
+    }
+    setEmailStatus("checking");
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", emailValue)
+      .maybeSingle();
+    setEmailStatus(data ? "taken" : "available");
+  }, []);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (emailTimerRef.current) clearTimeout(emailTimerRef.current);
+    if (!value) { setEmailStatus("idle"); return; }
+    emailTimerRef.current = setTimeout(() => checkEmailDuplicate(value), 500);
+  };
+
+  // 비밀번호 일치 확인
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const passwordMatch = passwordConfirm === "" ? "idle" : password === passwordConfirm ? "match" : "mismatch";
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -157,10 +190,27 @@ export default function RegisterPage() {
                 name="email"
                 type="email"
                 placeholder="이메일을 입력하세요"
-                className="pl-10 h-12 rounded-xl"
+                value={email}
+                onChange={handleEmailChange}
+                className={`pl-10 pr-10 h-12 rounded-xl ${emailStatus === "taken" ? "border-red-400 focus:ring-red-400" : emailStatus === "available" ? "border-green-400 focus:ring-green-400" : ""}`}
                 required
               />
+              {emailStatus === "checking" && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
+              )}
+              {emailStatus === "available" && (
+                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+              )}
+              {emailStatus === "taken" && (
+                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+              )}
             </div>
+            {emailStatus === "taken" && (
+              <p className="text-xs text-red-500 mt-1">이미 가입된 이메일입니다.</p>
+            )}
+            {emailStatus === "available" && (
+              <p className="text-xs text-green-600 mt-1">사용 가능한 이메일입니다.</p>
+            )}
           </div>
 
           <div>
@@ -256,6 +306,8 @@ export default function RegisterPage() {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="8자 이상 입력하세요"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="pl-10 pr-10 h-12 rounded-xl"
                 required
                 minLength={8}
@@ -279,11 +331,25 @@ export default function RegisterPage() {
                 name="passwordConfirm"
                 type="password"
                 placeholder="비밀번호를 다시 입력하세요"
-                className="pl-10 h-12 rounded-xl"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                className={`pl-10 pr-10 h-12 rounded-xl ${passwordMatch === "mismatch" ? "border-red-400 focus:ring-red-400" : passwordMatch === "match" ? "border-green-400 focus:ring-green-400" : ""}`}
                 required
                 minLength={8}
               />
+              {passwordMatch === "match" && (
+                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+              )}
+              {passwordMatch === "mismatch" && (
+                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+              )}
             </div>
+            {passwordMatch === "mismatch" && (
+              <p className="text-xs text-red-500 mt-1">비밀번호가 일치하지 않습니다.</p>
+            )}
+            {passwordMatch === "match" && (
+              <p className="text-xs text-green-600 mt-1">비밀번호가 일치합니다.</p>
+            )}
           </div>
 
           <div className="text-xs text-gray-500 pt-2">
@@ -294,7 +360,7 @@ export default function RegisterPage() {
             에 동의하는 것으로 간주됩니다.
           </div>
 
-          <Button type="submit" disabled={isPending} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl text-base font-semibold">
+          <Button type="submit" disabled={isPending || emailStatus === "taken" || passwordMatch === "mismatch"} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl text-base font-semibold disabled:opacity-50">
             {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (userType === "company" ? "파트너 가입 신청" : "가입하기")}
           </Button>
         </form>
