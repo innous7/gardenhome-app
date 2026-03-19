@@ -13,6 +13,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import type { Metadata } from "next";
+import PartnerApplyForm from "./apply-form";
 
 export const metadata: Metadata = {
   title: "파트너 입점 안내",
@@ -56,8 +57,8 @@ const BENEFITS = [
 const STEPS = [
   {
     step: "01",
-    title: "회원가입 & 입점 신청",
-    desc: "기본 정보와 사업자등록증을 제출하면 입점 신청이 완료됩니다.",
+    title: "회원가입 후 입점 신청",
+    desc: "일반 회원으로 가입 후 사업자등록증을 제출하면 입점 신청이 완료됩니다.",
   },
   {
     step: "02",
@@ -121,7 +122,7 @@ export default function PartnerJoinPage() {
             직접 받아보세요. 영업 없이도 사업이 성장합니다.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/register">
+            <a href="#apply">
               <Button
                 size="lg"
                 className="bg-white text-green-700 hover:bg-white/90 rounded-full px-8 h-14 text-lg font-bold shadow-lg"
@@ -129,7 +130,7 @@ export default function PartnerJoinPage() {
                 무료 입점 신청하기
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-            </Link>
+            </a>
           </div>
           <p className="text-white/60 text-sm mt-4">
             가입비 · 월 이용료 · 수수료 없음
@@ -283,24 +284,20 @@ export default function PartnerJoinPage() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="bg-green-600 py-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-            지금 바로 시작하세요
-          </h2>
-          <p className="text-white/80 text-lg mb-8">
-            무료 입점 신청은 3분이면 충분합니다
-          </p>
-          <Link href="/register">
-            <Button
-              size="lg"
-              className="bg-white text-green-700 hover:bg-white/90 rounded-full px-10 h-14 text-lg font-bold shadow-lg"
-            >
-              무료 입점 신청하기
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </Link>
+      {/* Apply Form */}
+      <section id="apply" className="py-20 scroll-mt-20">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              파트너 입점 신청
+            </h2>
+            <p className="text-gray-500 text-lg">
+              아래 정보를 입력하고 무료로 입점하세요
+            </p>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <PartnerApplyForm />
+          </div>
         </div>
       </section>
     </div>

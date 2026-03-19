@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useTransition, useCallback, useEffect } from "react";
+import { useState, useRef, useTransition, useCallback } from "react";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, User, Phone, Building2, UserPlus, Loader2, Upload, FileCheck, X, CheckCircle2, XCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, Phone, Loader2, CheckCircle2, XCircle, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,13 +12,8 @@ import { signUp } from "../actions";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [userType, setUserType] = useState<"customer" | "company">("customer");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [licenseFile, setLicenseFile] = useState<File | null>(null);
-  const [licenseUrl, setLicenseUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 이메일 중복 체크
   const [email, setEmail] = useState("");
@@ -53,67 +48,21 @@ export default function RegisterPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const passwordMatch = passwordConfirm === "" ? "idle" : password === passwordConfirm ? "match" : "mismatch";
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-    if (!allowedTypes.includes(file.type)) {
-      setError("JPG, PNG, PDF 파일만 업로드 가능합니다.");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setError("파일 크기는 10MB 이하여야 합니다.");
-      return;
-    }
-
-    setUploading(true);
-    setError(null);
-    const supabase = createClient();
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-
-    const { data, error: uploadError } = await supabase.storage
-      .from("business-licenses")
-      .upload(fileName, file, { upsert: true });
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
-      setError("파일 업로드에 실패했습니다. 다시 시도해주세요.");
-      setUploading(false);
-      return;
-    }
-
-    // 비공개 버킷이므로 경로만 저장 (관리자가 signed URL로 조회)
-    setLicenseFile(file);
-    setLicenseUrl(data.path);
-    setUploading(false);
-  };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     const formData = new FormData(e.currentTarget);
-    formData.set("role", userType === "company" ? "COMPANY" : "CUSTOMER");
+    formData.set("role", "CUSTOMER");
 
-    const password = formData.get("password") as string;
-    const passwordConfirm = formData.get("passwordConfirm") as string;
-    if (password !== passwordConfirm) {
+    const pw = formData.get("password") as string;
+    const pwConfirm = formData.get("passwordConfirm") as string;
+    if (pw !== pwConfirm) {
       setError("비밀번호가 일치하지 않습니다.");
       return;
     }
-    if (password.length < 8) {
+    if (pw.length < 8) {
       setError("비밀번호는 8자 이상이어야 합니다.");
       return;
-    }
-
-    if (userType === "company" && !licenseUrl) {
-      setError("사업자등록증을 첨부해주세요.");
-      return;
-    }
-
-    if (licenseUrl) {
-      formData.set("businessLicenseUrl", licenseUrl);
     }
 
     startTransition(async () => {
@@ -130,32 +79,6 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">회원가입</h1>
           <p className="text-sm text-gray-500 mt-2">GardenHome과 함께 시작하세요</p>
-        </div>
-
-        {/* User Type Toggle */}
-        <div className="flex gap-2 mb-6 p-1 bg-gray-100 rounded-xl">
-          <button
-            onClick={() => setUserType("customer")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all ${
-              userType === "customer"
-                ? "bg-white text-green-600 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <UserPlus className="w-4 h-4" />
-            일반 회원
-          </button>
-          <button
-            onClick={() => setUserType("company")}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all ${
-              userType === "company"
-                ? "bg-white text-green-600 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <Building2 className="w-4 h-4" />
-            조경회사
-          </button>
         </div>
 
         {error && (
@@ -221,79 +144,10 @@ export default function RegisterPage() {
                 type="tel"
                 placeholder="010-0000-0000"
                 className="pl-10 h-12 rounded-xl"
+                required
               />
             </div>
           </div>
-
-          {userType === "company" && (
-            <>
-              <div>
-                <Label htmlFor="companyName" className="text-sm font-medium">회사명</Label>
-                <div className="relative mt-1.5">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <Input
-                    id="companyName"
-                    name="companyName"
-                    placeholder="회사명을 입력하세요"
-                    className="pl-10 h-12 rounded-xl"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="businessNumber" className="text-sm font-medium">사업자등록번호</Label>
-                <Input
-                  id="businessNumber"
-                  name="businessNumber"
-                  placeholder="000-00-00000"
-                  className="h-12 rounded-xl"
-                  required
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-medium">사업자등록증 첨부 *</Label>
-                <div className="mt-1.5">
-                  {licenseFile ? (
-                    <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-xl">
-                      <FileCheck className="w-5 h-5 text-green-600 shrink-0" />
-                      <span className="text-sm text-green-700 truncate flex-1">{licenseFile.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => { setLicenseFile(null); setLicenseUrl(null); }}
-                        className="text-gray-400 hover:text-red-500"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-200 hover:border-green-400 rounded-xl bg-gray-50 hover:bg-green-50/50 transition-colors"
-                    >
-                      {uploading ? (
-                        <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-                      ) : (
-                        <>
-                          <Upload className="w-5 h-5 text-gray-400" />
-                          <span className="text-sm text-gray-500">사업자등록증 파일 선택</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <p className="text-xs text-gray-400 mt-1.5">JPG, PNG, PDF (최대 10MB)</p>
-                </div>
-              </div>
-            </>
-          )}
 
           <div>
             <Label htmlFor="password" className="text-sm font-medium">비밀번호</Label>
@@ -359,7 +213,7 @@ export default function RegisterPage() {
           </div>
 
           <Button type="submit" disabled={isPending || emailStatus === "taken" || passwordMatch === "mismatch"} className="w-full h-12 bg-green-600 hover:bg-green-700 text-white rounded-xl text-base font-semibold disabled:opacity-50">
-            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (userType === "company" ? "파트너 가입 신청" : "가입하기")}
+            {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "가입하기"}
           </Button>
         </form>
 
@@ -371,6 +225,19 @@ export default function RegisterPage() {
             로그인
           </Link>
         </p>
+      </div>
+
+      {/* 파트너 신청 안내 */}
+      <div className="mt-4 bg-green-50 border border-green-200 rounded-2xl p-5 flex items-start gap-3">
+        <Building2 className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-green-800">조경회사이신가요?</p>
+          <p className="text-xs text-green-700 mt-0.5">
+            일반 회원으로 가입 후{" "}
+            <Link href="/partner/join" className="underline font-semibold">파트너 입점 신청</Link>
+            을 진행해주세요.
+          </p>
+        </div>
       </div>
     </div>
   );
